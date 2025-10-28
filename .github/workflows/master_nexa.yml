@@ -24,6 +24,21 @@ jobs:
           java-version: '21'
           distribution: 'microsoft'
 
+¡Perfecto! Este es el archivo.
+
+Como te sospechaba, tu pom.xml no está en la raíz, sino (según tu captura de pantalla anterior) en la carpeta NEXA.
+
+El error de "no POM" viene del paso Build with Maven. Tienes que modificar dos partes de este archivo:
+
+Build with Maven: Decirle que ejecute el comando dentro de la carpeta NEXA.
+
+Upload artifact: Decirle que busque el archivo .jar resultante dentro de la carpeta NEXA/target/ (porque ahí es donde lo creará Maven).
+
+Lo que tienes que hacer
+Reemplaza esta sección de tu archivo:
+
+YAML
+
       - name: Build with Maven
         run: mvn clean install
 
@@ -32,6 +47,19 @@ jobs:
         with:
           name: java-app
           path: '${{ github.workspace }}/target/*.jar'
+Con esta versión corregida:
+
+YAML
+
+      - name: Build with Maven
+        run: mvn clean install
+        working-directory: ./NEXA  
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-app
+          path: '${{ github.workspace }}/NEXA/target/*.jar'
 
   deploy:
     runs-on: windows-latest
@@ -60,4 +88,5 @@ jobs:
           app-name: 'nexa'
           slot-name: 'Production'
           package: '*.jar'
+
           
